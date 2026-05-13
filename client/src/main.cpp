@@ -1,21 +1,19 @@
 #include <iostream>
-#include "socket.h"
+#include "snc_socket.hpp"
+#include <span>
+#include <cstring>
 
 int main() {
-    int socket = custom_socket();
-    custom_bind(socket);
-    custom_listen(socket);
-    int client = custom_accept(socket);
+    // Connecting to 127.0.0.1:8083 from port 8084
+    snc_socket::SNC_ClientSocket client(8084, 0x7f000001, 8083);
+    // The message being sent
+    char buffer[1024] = "Hello from client!";
+    // Sending the message (span + len (length of string + \0))
+    if (!client.send(std::as_bytes(std::span(buffer, std::strlen(buffer) + 1))).has_value()) { return 1; }
+    // Receiving the message
+    if (!client.recv(std::as_writable_bytes(std::span(buffer))).has_value()) { return 1; }
 
-    size_t buffer_size = 2048;
-    char *buffer = (char *)malloc(sizeof(char) * buffer_size);
-    size_t msg_size;
-    while (true) {
-        msg_size = custom_recv(client, buffer, buffer_size);
-        if (msg_size > 0) {
-            std::cout << buffer << std::endl;
-        }
-    }
+    std::cout << buffer << std::endl;
 
     return 0;
 }
