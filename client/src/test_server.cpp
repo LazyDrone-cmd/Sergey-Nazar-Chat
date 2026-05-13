@@ -25,18 +25,21 @@ int main() {
     addr.sin_addr.s_addr = INADDR_ANY;
     if (bind(server, (sockaddr *)&addr, sizeof(addr)) == -1) {
         std::cerr << "Socket binding error: " << std::strerror(errno) << std::endl;
+        close(server);
         return 1;
     }
 
     // Awaiting a connection
     if (listen(server, 1) == -1) {
         std::cerr << "Listening error: " << std::strerror(errno) << std::endl;
+        close(server);
         return 1;
     }
     // Accepting the conection
     int client = accept(server, NULL, NULL);
     if (client == -1) {
         std::cerr << "Accepting client error: " << std::strerror(errno) << std::endl;
+        close(server);
         return 1;
     }
 
@@ -46,6 +49,7 @@ int main() {
     ssize_t message_size = recv(client, buffer, sizeof(buffer), 0);
     if (message_size == -1) {
         std::cerr << "Receiving error: " << std::strerror(errno) << std::endl;
+        close(server);
         return 1;
     }
     std::cout << buffer << std::endl;
@@ -53,6 +57,7 @@ int main() {
     // Sending received message back
     if (send(client, buffer, message_size, 0) == -1) {
         std::cerr << "Sending error: " << std::strerror(errno) << std::endl;
+        close(server);
         return 1;
     }
 

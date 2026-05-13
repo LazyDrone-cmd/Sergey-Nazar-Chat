@@ -4,8 +4,9 @@
 #include <cstring>
 
 int main() {
-    // Connecting to 127.0.0.1:8083 from port 8084
-    snc_socket::SNC_ClientSocket client(8084, 0x7f000001, 8083);
+    // Connecting to 127.0.0.1:8083
+    snc_socket::SNC_ClientSocket client(0x7f000001, 8083);
+    auto a = std::move(client);
     // The message being sent
     char buffer[1024] = "Hello from client!";
     // Sending the message (span + len (length of string + \0))
