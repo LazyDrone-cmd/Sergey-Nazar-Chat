@@ -7,6 +7,15 @@
 #include <unistd.h>
 
 namespace snc_socket {
+    snc_ipv4 bytes_to_ipv4(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d) {
+        return htonl(
+            static_cast<std::uint32_t>(a) << 24 +
+            static_cast<std::uint32_t>(b) << 16 +
+            static_cast<std::uint32_t>(c) << 8 +
+            static_cast<std::uint32_t>(d)
+        );
+    }
+
     SNC_ClientSocket::SNC_ClientSocket(snc_ipv4 target_ip, snc_port target_port) {
         this->fd = socket(AF_INET, SOCK_STREAM, 0);
         if (this->fd == -1) { throw std::runtime_error("Couldn't acquire the socket"); }
@@ -19,14 +28,17 @@ namespace snc_socket {
             throw std::runtime_error("Couldn't connect to target");
         }
     }
+
     SNC_ClientSocket::~SNC_ClientSocket() {
         close(this->fd);
     }
+
     std::optional<std::size_t> SNC_ClientSocket::send(std::span<const std::byte> data) {
         ssize_t num_of_bytes = ::send(this->fd, data.data(), data.size_bytes(), 0);
         if (num_of_bytes == -1) { return std::nullopt; }
         return static_cast<std::size_t>(num_of_bytes);
     }
+
     std::optional<std::size_t> SNC_ClientSocket::recv(std::span<std::byte> data) {
         ssize_t num_of_bytes = ::recv(this->fd, data.data(), data.size_bytes(), 0);
         if (num_of_bytes == -1) { return std::nullopt; }
